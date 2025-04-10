@@ -1,7 +1,11 @@
 import discord
+import config
 
 async def initilize_guild(guild: discord.Guild, bot):
-    db = bot.mongoConnect['shark8']
+    if not config.auto_init:
+      return
+    
+    db = bot.mongoConnect[config.dbcollection]
     guild_collection = db["guild_data"]
     guild_id = str(guild.id)
     

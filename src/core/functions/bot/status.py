@@ -41,4 +41,5 @@ async def change_status(bot):
      
         
     await bot.change_presence(status=status, activity=activity)
-    logger.info(f"Status changed to {status_data['text']}")   
+    if config.log_status_update:
+      logger.info(f"Status changed to {status_data['text']}")   

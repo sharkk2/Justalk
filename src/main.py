@@ -1,12 +1,12 @@
 # ╔════════════════════╗
 # ║                    ║
-# ║   © Quantum Labs   ║
+# ║   © Lunara Labs    ║
 # ║                    ║
 # ╚════════════════════╝
 
 
 import discord
-from datetime import datetime
+import time
 from discord.ext import commands
 import asyncio
 import config
@@ -26,6 +26,9 @@ intents = discord.Intents().all()
 bot = commands.Bot(command_prefix=prefix, intents=intents, case_insensitive=True)
 bot.remove_command('help')
 
+
+
+
 if config.maintainance:  
   logging.basicConfig(
      filename=config.log_file,
@@ -35,17 +38,13 @@ if config.maintainance:
      datefmt='%Y-%m-%d %I.%M.%S'
   )
 
-    
-
-
 
 @bot.event
 async def on_ready():
    try:  
-     msg_box('\n© Quantum Labs\n')
+     msg_box('\n© Lunara labs\n')
+     bot.startTime = time.time()
      await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.playing, name=f"Loading.."))
-     bot.start_time = datetime.utcnow()
-     
      from core.handlers import commands, events, task_handler      
      from core.functions.bot.error import error
      from core.functions.bot.check_perms import check_perms
@@ -56,13 +55,15 @@ async def on_ready():
      await commands.register_commands(bot) 
      await events.register_events(bot)
      await task_handler.register_tasks(bot)
-     logger.info(f"Syncing database")           
-     try:
-       await sync_db(bot)
-       logger.info(f"Database synced successfully")     
-     except Exception as e:
-       logger.warning(f"Failed to sync database: {e}")
-         
+     if config.auto_sync:
+       logger.info(f"Syncing database")           
+       try:
+         await sync_db(bot)
+         logger.info(f"Database synced successfully")     
+       except Exception as e:
+         logger.warning(f"Failed to sync database: {e}")
+     else:
+       logger.warning(f"Auto database sync is disabled!")    
       
                                                                                                
      try:
@@ -73,6 +74,7 @@ async def on_ready():
        
        logger.info(f"Synced {len(synced)} command(s)") 
        logging.info(f'Synced {len(synced)} command(s)')
+       logging.info('Ready')
      except Exception as e:
        print(e)
        logging.error(e)
@@ -85,10 +87,6 @@ async def on_ready():
        logger.fatal(e)
        logging.critical(e)     
 
-
-@bot.command()
-async def hey(ctx):
-  await ctx.send("ayo wsup")
 
   
 

@@ -15,12 +15,13 @@ cd = datetime.now().strftime('%Y-%m-%d %I.%M.%S')
 version = '1.0.0'
 prefix = 'jt.'
 
-dbcollection = "Justalk"
-auto_init = True # auto intilizes db for new servers
+dbName = "Justalk"
+auto_init = False # ? auto intilizes db for new servers
+auto_sync = False # ? auto syncs db for guilds added while offline
 
 owner_ids = [1092548532180877415]
 
-embedcolor = discord.Color.blurple()
+embedcolor = discord.Color.green()
 
 embederrorcolor = discord.Color.red()
 
@@ -29,7 +30,6 @@ token = os.getenv("token")
 client_secret = os.getenv("client_secret")
 
 log_channel = 1186322386241474611
-
 
 
 ### ENV CONFIG ###
@@ -91,3 +91,5 @@ statuses = [
     {"text": "(g) Guilds", "type": "dnd", "activity": "watching", "url": ""},
     {"text": "(c) Commands", "type": "idle", "activity": "listening", "url": ""},
 ] # a Listening to (chats) chats??
+
+log_status_update = False

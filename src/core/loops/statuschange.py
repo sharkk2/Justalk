@@ -15,6 +15,4 @@ class StatusChange(commands.Cog):
 
 
 async def setup(bot):
-    global Bot 
-    Bot = bot
     await bot.add_cog(StatusChange(bot))      
