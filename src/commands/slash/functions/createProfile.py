@@ -10,7 +10,17 @@ async def createProfile(bot, interaction: discord.Interaction):
     db = bot.mongoConnect['Justalk']
     profile_collection = db["profiles"]    
     uid = str(interaction.user.id)
-    profile = {"_id": uid, "waiting": False, "total_chats": 0, "invisible": False}
+    profile = {
+        "_id": uid,
+        "chat": {
+            "waiting": False,
+            "w_pers": False, # ? waiting for personalized chat
+            "chatting": False,
+            "partner": None
+        },
+        "total_chats": 0,
+        "invisible": False,
+    }
     
     eStr = "*(it's recommended to do this setup in the bot's DMS)*"
     if inDMS == False:

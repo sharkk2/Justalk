@@ -10,7 +10,7 @@ class ProfileMenu(discord.ui.View):
   @discord.ui.button(label=f'Change region', style=discord.ButtonStyle.primary, row=1, disabled=False, emoji='🌍')
   async def cRegion(self, interaction: discord.Interaction, button: discord.ui.Button):  
        try:
-            ...
+            await interaction.response.send_message("SOON")
        except Exception as e:
           logger.error(e)   
       
@@ -18,7 +18,7 @@ class ProfileMenu(discord.ui.View):
   @discord.ui.button(label=f'Change language', style=discord.ButtonStyle.primary, row=1, disabled=False, emoji='🗣')
   async def cLang(self, interaction: discord.Interaction, button: discord.ui.Button):  
        try:
-            ...
+            await interaction.response.send_message("SOON")
        except Exception as e:
           logger.error(e)                
       
@@ -26,6 +26,6 @@ class ProfileMenu(discord.ui.View):
   @discord.ui.button(label=f'Toggle invisibilty', style=discord.ButtonStyle.gray, row=2, disabled=False)
   async def tInvis(self, interaction: discord.Interaction, button: discord.ui.Button):  
        try:
-            ...
+            await interaction.response.send_message("SOON")
        except Exception as e:
           logger.error(e)   
