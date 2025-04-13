@@ -4,10 +4,11 @@ from .regionSelect import regionSelect
 from core.logger.logger import logger
 
 class Dropper(discord.ui.Select):
-    def __init__(self, profile, bot, interaction):
+    def __init__(self, profile, bot, interaction, asSetup):
         self.profile = profile
         self.bot = bot
         self.interaction = interaction
+        self.setup = asSetup
         
         options = [
             discord.SelectOption(label='English', description='English', emoji='🇬🇧', value='en'),
@@ -32,25 +33,41 @@ class Dropper(discord.ui.Select):
             discord.SelectOption(label='Persian', description='فارسی', emoji='🇮🇷', value='fa'),       
             discord.SelectOption(label='Dutch', description='Nederlands', emoji='🇳🇱', value='nl'),
             discord.SelectOption(label='Romanian', description='Română', emoji='🇷🇴', value='ro'),
-            discord.SelectOption(label='Hungarian', description='Magyar', emoji='🇭🇺', value='hu'),
+            discord.SelectOption(label='Other', description='Other languages', emoji='🗣', value='other'),
         ]
-
+  
 
         
         super().__init__(placeholder='Pick your languages', options=options, min_values=1, max_values=5)
 
     async def callback(self, interaction: discord.Interaction):
         try:
-          langs = self.values
-          self.profile['langs'] = langs
-          
-          embed = discord.Embed(title="New profile", description=f"Great! You've picked the following language(s): `{', '.join(langs)}`\nNow, please pick your region", color=config.embedcolor)
-          await interaction.response.edit_message(embed=embed, view=regionSelect(self.profile, self.bot, self.interaction))          
-                     
+          if self.setup:  
+            langs = self.values
+            self.profile['langs'] = langs
+            
+            embed = discord.Embed(title="New profile", description=f"Great! You've picked the following language(s): `{', '.join(langs)}`\nNow, please pick your region", color=config.embedcolor)
+            await interaction.response.edit_message(embed=embed, view=regionSelect(self.profile, self.bot, self.interaction))         
+          else:
+            from .profileMenu import ProfileMenu
+            langs = self.values
+            
+            db = self.bot.mongoConnect['Justalk']
+            profile_collection = db["profiles"]    
+            uid = str(interaction.user.id)
+            profile = await profile_collection.find_one({"_id": uid})
+            
+            profile['langs'] = langs
+            await profile_collection.update_one({"_id": str(uid)}, {"$set": profile}, upsert=True)     
+            
+            region = profile['region'].replace("_", " ").capitalize()
+            embed = discord.Embed(title="Profile", description=f"Hello **{interaction.user.name}**\n{config.replycont} Total chats: **{profile['total_chats']}**\n{config.replycont} Current languages: `{', '.join(profile['langs'])}`\n{config.replycont} Current region: **{region}**\n{config.reply} Anonymous: **{profile['invisible']}**", color=config.embedcolor)
+            await interaction.response.edit_message(embed=embed, view=ProfileMenu(interaction, self.bot))
+                 
         except Exception as e:
             logger.error(e)
             
 class langSelect(discord.ui.View):
-    def __init__(self, profile, bot, interaction):
+    def __init__(self, profile, bot, interaction, setup):
         super().__init__(timeout=None) 
-        self.add_item(Dropper(profile, bot, interaction))
+        self.add_item(Dropper(profile, bot, interaction, setup))

@@ -23,7 +23,7 @@ class onMessage(commands.Cog):
         uid = str(user.id)
         now = time.time()
         if uid in self.cooldowns and now - self.cooldowns[uid] < 2:
-            message.add_reaction("⏳")
+            await message.add_reaction("⏳")
             return
         
         self.cooldowns[uid] = now
@@ -38,11 +38,11 @@ class onMessage(commands.Cog):
                 if chatter:
                     
                     blacklist = ["http://", "https://", "www.", ".com", ".net", ".org", ".io", ".co", ".me", ".gg", ".dev"]
-                    if any(word in message.content for word in blacklist):
+                    if any(word in message.content.lower() for word in blacklist):
                       await message.add_reaction(config.no)
                       return
                     
-                    await chatter.send(f"**{user.name}**: {message.content}")
+                    await chatter.send(f"**{'Anonymous' if profile['invisible'] else user.name}**: {message.content}")
                     await message.add_reaction("📩")    
          
 async def setup(bot):

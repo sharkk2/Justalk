@@ -22,17 +22,17 @@ async def command(interaction: discord.Interaction, personalized: bool = False):
       profile = await profile_collection.find_one({"_id": uid})
       
       if not profile:
-         embed = discord.Embed(description=f"{config.no} | Please make a profile first by doing `/profile`", color=config.embederrorcolor)
+         embed = discord.Embed(description=f"{config.no} | Please make a profile first by doing </profile:1359889588885262406>", color=config.embederrorcolor)
          await interaction.followup.send(embed=embed)
          return
      
       if profile['chat']['waiting'] or profile['chat']['w_pers']:
-        embed = discord.Embed(description=f"{config.no} | You're already waiting, do `/disconnect` to leave", color=config.embederrorcolor)
+        embed = discord.Embed(description=f"{config.no} | You're already waiting, do </disconnect:1360220262112559215> to leave", color=config.embederrorcolor)
         await interaction.followup.send(embed=embed)
         return
         
       if profile['chat']['chatting']:
-        embed = discord.Embed(description=f"{config.no} | You're already in chat, do `/disconnect` to leave", color=config.embederrorcolor)
+        embed = discord.Embed(description=f"{config.no} | You're already in chat, do </disconnect:1360220262112559215> to leave", color=config.embederrorcolor)
         await interaction.followup.send(embed=embed, ephemeral=True)
         return
           
@@ -108,14 +108,20 @@ async def command(interaction: discord.Interaction, personalized: bool = False):
             if pair:
               tTime, offset = get_time(match['region'])
               region = match['region'].replace("_", " ").capitalize()
-              embed = discord.Embed(title="Chat found", description=f"You've been matched with **{pair.name}**!\nYou can now start chatting, say hi!\n{config.replycont} Their languages: `{', '.join(match['langs'])}`\n{config.reply} Region: **{region}**\n{config.reply} Their time: <t:{int(tTime)}:t> *GMT{offset} (estimated)*\n\nPair ID: `{pair.id}`", color=discord.Color.green())
-              embed.set_author(name=pair.name, icon_url=pair.avatar.url if pair.avatar else pair.default_avatar.url)
+              embed = discord.Embed(title="Chat found", description=f"You've been matched with **{'Anonymous user' if match['invisible'] else pair.name}**!\nYou can now start chatting, say hi!\n{config.replycont} Their languages: `{', '.join(match['langs'])}`\n{config.reply} Region: **{region}**\n{config.reply} Their time: <t:{int(tTime)}:t> *GMT{offset} (estimated)*\n\nPair ID: `{'*****' if match['invisible'] else pair.id}`", color=discord.Color.green())
+              if not match['invisible']:
+                embed.set_author(name=pair.name, icon_url=pair.avatar.url if pair.avatar else pair.default_avatar.url)
+              else:
+                embed.set_author(name="Anonymous", icon_url=pair.default_avatar.url)  
               embed.set_footer(text="You can cancel the chat by doing /disconnect")
               await interaction.user.send(embed=embed)
               tTime, offset = get_time(profile['region'])
               region = profile['region'].replace("_", " ").capitalize()
-              embed = discord.Embed(title="Chat found", description=f"You've been matched with **{interaction.user.name}**!\nYou can now start chatting, say hi!\n{config.replycont} Their languages: `{', '.join(match['langs'])}`\n{config.replycont} Region: **{region}**\n{config.reply} Their time: <t:{int(tTime)}:t> *GMT{offset} (estimated)*\n\nPair ID: `{interaction.user.id}`", color=discord.Color.green())
-              embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+              embed = discord.Embed(title="Chat found", description=f"You've been matched with **{'Anonymous user' if profile['invisible'] else interaction.user.name}**!\nYou can now start chatting, say hi!\n{config.replycont} Their languages: `{', '.join(profile['langs'])}`\n{config.replycont} Region: **{region}**\n{config.reply} Their time: <t:{int(tTime)}:t> *GMT{offset} (estimated)*\n\nPair ID: `{'*****' if profile['invisible'] else interaction.user.id}`", color=discord.Color.green())
+              if not profile['invisible']:
+                embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+              else:
+                embed.set_author(name="Anonymous", icon_url=interaction.user.default_avatar.url)  
               embed.set_footer(text="You can cancel the chat by doing /disconnect")
               await pair.send(embed=embed)
               break

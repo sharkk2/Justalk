@@ -14,7 +14,7 @@ async def command(interaction: discord.Interaction):
       profile = await profile_collection.find_one({"_id": uid})
       
       if not profile:
-         embed = discord.Embed(description=f"{config.no} | Please make a profile first by doing `/profile`", color=config.embederrorcolor)
+         embed = discord.Embed(description=f"{config.no} | Please make a profile first by doing </profile:1359889588885262406>", color=config.embederrorcolor)
          await interaction.followup.send(embed=embed)
          return
      

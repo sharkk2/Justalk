@@ -3,10 +3,11 @@ import config
 from core.logger.logger import logger
 
 class Dropper(discord.ui.Select):
-    def __init__(self, profile, bot, interaction):
+    def __init__(self, profile, bot, interaction, asSetup):
         self.profile = profile
         self.bot = bot
         self.interaction = interaction
+        self.asSetup = asSetup
         
         options = [
             discord.SelectOption(label='Central Europe', description='Germany, Poland, Czechia, etc.', emoji='🌍', value='central_europe'),
@@ -29,20 +30,31 @@ class Dropper(discord.ui.Select):
         super().__init__(placeholder='Pick your region', options=options, min_values=1, max_values=1)
 
     async def callback(self, interaction: discord.Interaction):
-        try:
+        try:  
           region = self.values[0]
           self.profile['region'] = region
+          
           
           db = self.bot.mongoConnect['Justalk']
           profile_collection = db["profiles"]    
           uid = str(interaction.user.id)
           profile = await profile_collection.find_one({"_id": uid})
-          profile = self.profile
-    
-          await profile_collection.update_one({"_id": str(uid)}, {"$set": profile}, upsert=True)     
           
-          embed = discord.Embed(title="Profile set!", description=f"You're good to go! Start chatting by doing `/chat`", color=config.embedcolor)
-          await interaction.response.edit_message(embed=embed, view=None)          
+          if self.asSetup:
+            profile = self.profile
+      
+            await profile_collection.update_one({"_id": str(uid)}, {"$set": profile}, upsert=True)     
+            
+            embed = discord.Embed(title="Profile set!", description=f"You're good to go! Start chatting by doing `/chat`", color=config.embedcolor)
+            await interaction.response.edit_message(embed=embed, view=None)       
+          else:
+            from .profileMenu import ProfileMenu
+            profile['region'] = region
+            await profile_collection.update_one({"_id": str(uid)}, {"$set": profile}, upsert=True)     
+            
+            region = profile['region'].replace("_", " ").capitalize()
+            embed = discord.Embed(title="Profile", description=f"Hello **{interaction.user.name}**\n{config.replycont} Total chats: **{profile['total_chats']}**\n{config.replycont} Current languages: `{', '.join(profile['langs'])}`\n{config.replycont} Current region: **{region}**\n{config.reply} Anonymous: **{profile['invisible']}**", color=config.embedcolor)
+            await interaction.response.edit_message(embed=embed, view=ProfileMenu(interaction, self.bot))
                        
                  
                      
@@ -50,6 +62,6 @@ class Dropper(discord.ui.Select):
             logger.error(e)
             
 class regionSelect(discord.ui.View):
-    def __init__(self, profile, bot, interaction):
+    def __init__(self, profile, bot, interaction, asSetup):
         super().__init__(timeout=None) 
-        self.add_item(Dropper(profile, bot, interaction))
+        self.add_item(Dropper(profile, bot, interaction, asSetup))
